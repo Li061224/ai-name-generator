@@ -10,17 +10,19 @@ export default async function handler(req) {
     return new Response('Method Not Allowed', { status: 405 });
   }
 
-  // 密钥全部从环境变量读取，不写死
+  // 密钥与配置全部从环境变量读取，不写死
+  // OPENAI_BASE_URL 默认 DeepSeek（国内直连），也可换成 OpenAI 等兼容端点
   const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+  const OPENAI_BASE_URL = process.env.OPENAI_BASE_URL || 'https://api.deepseek.com';
   const SUPABASE_URL = process.env.SUPABASE_URL;
   const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
-  const MODEL_NAME = process.env.MODEL_NAME || 'gpt-4o-mini';
+  const MODEL_NAME = process.env.MODEL_NAME || 'deepseek-chat';
 
   if (!OPENAI_API_KEY || !SUPABASE_URL || !SUPABASE_ANON_KEY) {
     return new Response('缺少环境变量配置，请检查 Vercel 环境变量', { status: 500 });
   }
 
-  const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
+  const openai = new OpenAI({ apiKey: OPENAI_API_KEY, baseURL: OPENAI_BASE_URL });
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   const { prompt } = await req.json();

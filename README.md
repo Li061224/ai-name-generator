@@ -33,10 +33,11 @@ alter table ai_name_records enable row level security;
 ## Vercel 环境变量
 | Key | Value |
 |---|---|
-| `OPENAI_API_KEY` | OpenAI API Key |
+| `OPENAI_API_KEY` | API 密钥（DeepSeek：platform.deepseek.com 注册获取 `sk-...`） |
+| `OPENAI_BASE_URL` | API 地址（可选，默认 `https://api.deepseek.com`，国内直连；用 OpenAI 时填 `https://api.openai.com/v1`） |
 | `SUPABASE_URL` | Supabase 项目 URL |
-| `SUPABASE_ANON_KEY` | Supabase anon public key |
-| `MODEL_NAME` | 模型名（可选，默认 `gpt-4o-mini`） |
+| `SUPABASE_ANON_KEY` | Supabase anon public key（新版为 `sb_publishable_...`） |
+| `MODEL_NAME` | 模型名（可选，默认 `deepseek-chat`） |
 
 ## 部署
 1. 导入本仓库到 Vercel
