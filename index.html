@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI起名生成器</title>
+  <style>
+    * {box-sizing: border-box;margin:0;padding:0;font-family:system-ui, -apple-system, sans-serif;}
+    body {max-width:700px;margin:40px auto;padding:0 20px;background:#fafafa;}
+    h1 {margin-bottom:8px;color:#1f2937;font-size:28px;}
+    .sub {color:#6b7280;margin-bottom:24px;font-size:14px;}
+    textarea {width:100%;padding:14px;font-size:16px;border:1px solid #d1d5db;border-radius:10px;min-height:120px;resize:vertical;outline:none;}
+    textarea:focus {border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.15);}
+    button {margin-top:16px;padding:12px 28px;border:none;border-radius:10px;background:#3b82f6;color:white;font-size:16px;cursor:pointer;transition:background .2s;}
+    button:hover:not(:disabled) {background:#2563eb;}
+    button:disabled {background:#94a3b8;cursor:not-allowed;}
+    .result {margin-top:24px;padding:20px 24px;border-radius:12px;background:#ffffff;border:1px solid #e5e7eb;white-space:pre-wrap;font-size:16px;line-height:1.8;min-height:120px;color:#374151;}
+    .result:empty::before {content:'生成结果会显示在这里…';color:#9ca3af;}
+    .model-tip {margin-top:12px;font-size:12px;color:#9ca3af;text-align:right;}
+  </style>
+</head>
+<body>
+  <h1>✨ AI起名生成器</h1>
+  <p class="sub">输入需求，AI 为你生成 3 组名字并解释寓意（流式输出）</p>
+  <textarea id="prompt" placeholder="描述你的起名需求，例如：给女孩起名，温柔有书卷气，两字名；或：给科技公司起名，简洁有国际感"></textarea>
+  <br>
+  <button id="generateBtn">开始生成</button>
+  <div class="result" id="resultBox"></div>
+  <div class="model-tip" id="modelTip"></div>
+
+  <script>
+    const promptEl = document.getElementById('prompt');
+    const btn = document.getElementById('generateBtn');
+    const resultBox = document.getElementById('resultBox');
+    const modelTip = document.getElementById('modelTip');
+
+    btn.onclick = async () => {
+      const prompt = promptEl.value.trim();
+      if (!prompt) return alert('请输入起名需求');
+      btn.disabled = true;
+      resultBox.textContent = '';
+      modelTip.textContent = '';
+
+      const res = await fetch('/api/generate-name', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ prompt })
+      });
+
+      if (!res.ok) {
+        const err = await res.text();
+        resultBox.textContent = '请求失败：' + err;
+        btn.disabled = false;
+        return;
+      }
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while(true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, {stream:true});
+        const lines = buffer.split('\n\n');
+        buffer = lines.pop();
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          const payload = JSON.parse(line.slice(6));
+          if (payload.done) {
+            modelTip.textContent = '本次生成已保存到 Supabase';
+            break;
+          }
+          if (payload.error) {
+            resultBox.textContent += '\n错误：' + payload.error;
+            break;
+          }
+          if (payload.text) {
+            resultBox.textContent += payload.text;
+          }
+        }
+      }
+      btn.disabled = false;
+    }
+  </script>
+</body>
+</html>

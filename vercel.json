@@ -1,0 +1,8 @@
+{
+  "functions": {
+    "api/generate-name.js": {
+      "maxDuration": 60
+    }
+  },
+  "rewrites": []
+}

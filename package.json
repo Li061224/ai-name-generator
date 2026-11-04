@@ -1,0 +1,13 @@
+{
+  "name": "ai-name-generator",
+  "version": "1.0.0",
+  "description": "AI起名生成器 - 流式输出3组名字+寓意，记录保存到Supabase",
+  "main": "index.html",
+  "scripts": {
+    "start": "vercel dev"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0",
+    "openai": "^4.60.0"
+  }
+}
